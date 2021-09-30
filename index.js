@@ -194,10 +194,9 @@ app.get("/api/getScaapes", (req, res) => {
     });
   });
 
-app.get("/api/getParticipants/ScaapeId=:ScaapeId/UserId=:UserId", (req, res) => {
+app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
     const ScaapeId = req.params.ScaapeId;
-    const UserId = req.params.UserId;
-    db.query(`SELECT ScaapeParticipant.*, UserDetails.* FROM scaape.ScaapeParticipant inner join UserDetails on UserDetails.UserId = ScaapeParticipant.UserId where ScaapeParticipant.ScaapeId = '${ScaapeId}' and ScaapeParticipant.UserId = '${UserId}' ;`, (err, result) => {
+    db.query(`SELECT ScaapeParticipant.*, UserDetails.* FROM scaape.ScaapeParticipant inner join UserDetails on UserDetails.UserId = ScaapeParticipant.UserId where ScaapeParticipant.ScaapeId = '${ScaapeId}' ;`, (err, result) => {
       if (err) {
         console.log(err);
         res.send(err.sqlMessage);  
@@ -209,6 +208,60 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId/UserId=:UserId", (req, res) => 
       
     });
   });
+
+  app.get("/api/getScaapesById/UserId=:UserId/Status=:Status", (req, res) => {
+    const Status = req.params.Status;
+    const UserId = req.params.UserId;
+    db.query(`SELECT * FROM scaape.Scaapes where UserId = "${UserId}" and Status = "${Status}";`, (err, result) => {
+      if (err) {
+        console.log(err);
+        res.send(err.sqlMessage);  
+      }
+      else{
+          console.log(result);
+       res.send(result);   
+      }
+      
+    });
+  });
+  app.post("/api/UpdateParticipant", (req, res) => {
+    const Accepted = req.body.Accepted;
+    const UserId = req.body.UserId;
+    console.log(UserId, Accepted);
+  
+  
+    db.query(
+      `update ScaapeParticipant set Accepted = ${Accepted} where UserId = ${UserId};`,
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res.send(err.sqlMessage);
+        }
+        else{
+          console.log(result); 
+           res.send("Succefully added to db");
+        }
+        
+      }
+    );
+    
+  });
+  app.get("/api/getAcceptedParticipant/ScaapeId=:ScaapeId", (req, res) => {
+    const Status = req.params.Status;
+    const ScaapeId = req.params.ScaapeId;
+    db.query(`SELECT ScaapeParticipant.*, UserDetails.* FROM scaape.ScaapeParticipant inner join UserDetails on UserDetails.UserId = ScaapeParticipant.UserId where ScaapeParticipant.ScaapeId = '${ScaapeId}' and ScaapeParticipant.Accepted = 1  ;`, (err, result) => {
+      if (err) {
+        console.log(err);
+        res.send(err.sqlMessage);  
+      }
+      else{
+          console.log(result);
+       res.send(result);   
+      }
+      
+    });
+  });
+
 
 app.listen(process.env.PORT || 4000, () => {
   console.log(`Example app listening at http://localhost: 4000`);
