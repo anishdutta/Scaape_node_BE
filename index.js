@@ -246,10 +246,53 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
     );
     
   });
+  app.post("/api/DeleteParticipant", (req, res) => {
+    const ScaapeId = req.body.ScaapeId;
+    const UserId = req.body.UserId;
+    console.log(UserId, ScaapeId);
+  
+  
+    db.query(
+      `delete from ScaapeParticipant where ScaapeId = "${ScaapeId}" and UserId = "${UserId}";`,
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res.send(err.sqlMessage);
+        }
+        else{
+          console.log(result); 
+          if(result.affectedRows === 0){
+            res.send("No rows changed")
+          }
+          else{
+            res.send("Succefully deleted from db");
+          }
+           
+        }
+        
+      }
+    );
+    
+  });
   app.get("/api/getAcceptedParticipant/ScaapeId=:ScaapeId", (req, res) => {
     const Status = req.params.Status;
     const ScaapeId = req.params.ScaapeId;
     db.query(`SELECT ScaapeParticipant.*, UserDetails.* FROM scaape.ScaapeParticipant inner join UserDetails on UserDetails.UserId = ScaapeParticipant.UserId where ScaapeParticipant.ScaapeId = '${ScaapeId}' and ScaapeParticipant.Accepted = 1  ;`, (err, result) => {
+      if (err) {
+        console.log(err);
+        res.send(err.sqlMessage);  
+      }
+      else{
+          console.log(result);
+       res.send(result);   
+      }
+      
+    });
+  });
+  app.get("/api/getScaapesWithAuth/UserId=:UserId", (req, res) => {
+    const UserId = req.params.UserId;
+    console.log(UserId);
+    db.query(`SELECT * , case when exists( SELECT * FROM ScaapeParticipant WHERE UserId = ${UserId} and ScaapeId = Scaapes.ScaapeId ) then 'True' else 'False' end as isPresent, case when exists( select UserId from Scaapes where UserId = ${UserId} ) then 'True' else 'False' end as Admin FROM scaape.Scaapes ;`, (err, result) => {
       if (err) {
         console.log(err);
         res.send(err.sqlMessage);  
