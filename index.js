@@ -237,7 +237,7 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
   app.get("/api/getScaapesById/UserId=:UserId/Status=:Status", (req, res) => {
     const Status = req.params.Status;
     const UserId = req.params.UserId;
-    db.query(`SELECT * FROM scaape.Scaapes where UserId = "${UserId}" and Status = "${Status}";`, (err, result) => {
+    db.query(`SELECT *, (select count(*) from ScaapeParticipant where ScaapeParticipant.ScaapeId = Scaapes.ScaapeId ) as count FROM scaape.Scaapes where UserId = "${UserId}" and Status = "${Status}";`, (err, result) => {
       if (err) {
         console.log(err);
         res.send(err.sqlMessage);  
