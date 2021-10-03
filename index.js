@@ -126,6 +126,30 @@ app.get("/api/getUserPhotos/:id", (req, res) => {
     });
   });
 
+  app.post("/api/DeleteUserPhotos", (req, res) => {
+    const Id = req.body.Id;
+    const UserId = req.body.UserId;
+  
+    
+  
+  
+    db.query(
+      `delete from UserPhotos where Id = "${Id}" and UserId = "${UserId}";`,
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res.send(err.sqlMessage);
+        }
+        else{
+            console.log(result);
+            res.send("Succefully added to db");
+        }
+        
+      }
+    );
+    
+  });
+
 
   app.post("/api/createScaape", (req, res) => {
     const ScaapeId = req.body.ScaapeId;
@@ -136,10 +160,11 @@ app.get("/api/getUserPhotos/:id", (req, res) => {
     const Location = req.body.Location;
     const ScaapeImg = req.body.ScaapeImg;
     const Status = req.body.Status;
+    const ScaapeDate = req.body.ScaapeDate;
   
   
     db.query(
-      `insert into Scaapes (ScaapeId, UserId,ScaapeName,Description,ScaapePref,Location,ScaapeImg,Status ) values ('${ScaapeId}', '${UserId}', '${ScaapeName}', '${Description}', '${ScaapePref}', '${Location}',  '${ScaapeImg}', '${Status}');`,
+      `insert into Scaapes (ScaapeId, UserId,ScaapeName,Description,ScaapePref,Location,ScaapeImg,Status, ScaapeDate ) values ('${ScaapeId}', '${UserId}', '${ScaapeName}', '${Description}', '${ScaapePref}', '${Location}',  '${ScaapeImg}', '${Status}', '${ScaapeDate}');`,
       (err, result) => {
         if (err) {
           console.log(err);
