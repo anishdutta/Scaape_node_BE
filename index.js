@@ -299,6 +299,7 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
     );
     
   });
+  
   app.get("/api/getAcceptedParticipant/ScaapeId=:ScaapeId", (req, res) => {
     const Status = req.params.Status;
     const ScaapeId = req.params.ScaapeId;
@@ -328,6 +329,78 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
       }
       
     });
+  });
+  app.get("/api/getRecentRequest/UserId=:UserId", (req, res) => {
+    const UserId = req.params.UserId;
+    console.log(UserId);
+    db.query(`SELECT Scaapes.Location, ScaapeParticipant.*, (select UserDetails.Name from UserDetails where UserDetails.UserId = ScaapeParticipant.UserId) as Name, (select UserDetails.EmailId from UserDetails where UserDetails.UserId = ScaapeParticipant.UserId) as Email, (select UserDetails.InstaId from UserDetails where UserDetails.UserId = ScaapeParticipant.UserId) as InstaId, (select UserDetails.ProfileImg from UserDetails where UserDetails.UserId = ScaapeParticipant.UserId) as DP, (select UserDetails.Vaccine from UserDetails where UserDetails.UserId = ScaapeParticipant.UserId) as Vaccine FROM scaape.ScaapeParticipant inner join Scaapes on Scaapes.ScaapeId = ScaapeParticipant.ScaapeId where Scaapes.UserId = '${UserId}';`, (err, result) => {
+      if (err) {
+        console.log(err);
+        res.send(err.sqlMessage);  
+      }
+      else{
+          console.log(result);
+       res.send(result);   
+      }
+      
+    });
+  });
+  app.post("/api/UpdateScaapeStatus", (req, res) => {
+    const ScaapeId = req.body.ScaapeId;
+    const Status = req.body.Status;
+    console.log(Status, ScaapeId);
+  
+  
+    db.query(
+      `update Scaapes set Scaapes.Status = '${Status}' where Scaapes.ScaapeId = '${ScaapeId}';`,
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res.send(err.sqlMessage);
+        }
+        else{
+          console.log(result); 
+          if(result.affectedRows === 0){
+            res.send("No rows changed")
+          }
+          else{
+            res.send("Succefully updated db");
+          }
+           
+        }
+        
+      }
+    );
+    
+  });
+  app.post("/api/DeleteScaape", (req, res) => {
+    const ScaapeId = req.body.ScaapeId;
+    const UserId = req.body.UserId;
+    console.log(UserId, ScaapeId);
+  
+  
+    db.query(
+      `delete from Scaapes where ScaapeId = "${ScaapeId}" and UserId = "${UserId}";`,
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res.send(err.sqlMessage);
+        }
+        else{
+          console.log(result); 
+          if(result.affectedRows === 0){
+            
+            res.status(400).send("No rows changed");
+          }
+          else{
+            res.send("Succefully deleted from db");
+          }
+           
+        }
+        
+      }
+    );
+    
   });
 
 
