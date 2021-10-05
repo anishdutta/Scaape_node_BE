@@ -86,8 +86,12 @@ app.get("/api/getFromId/:id", (req, res) => {
   db.query("SELECT * FROM myusers WHERE Id = ?", id, (err, result) => {
     if (err) {
       console.log(err);
+      res.status(400).send(err.sqlMessage);
     }
-    res.send(result);
+    else{
+        console.log(result);
+        res.send("Succefully added to db");
+    }
   });
 });
 
@@ -104,7 +108,7 @@ app.post("/api/createUserPhotos", (req, res) => {
     (err, result) => {
       if (err) {
         console.log(err);
-        res.send(err.sqlMessage);
+        res.status(400).send(err.sqlMessage);
       }
       else{
           console.log(result);
@@ -138,7 +142,7 @@ app.get("/api/getUserPhotos/:id", (req, res) => {
       (err, result) => {
         if (err) {
           console.log(err);
-          res.send(err.sqlMessage);
+          res.status(400).send(err.sqlMessage);
         }
         else{
             console.log(result);
@@ -168,7 +172,7 @@ app.get("/api/getUserPhotos/:id", (req, res) => {
       (err, result) => {
         if (err) {
           console.log(err);
-          res.send(err.sqlMessage);
+          res.status(400).send(err.sqlMessage);
         }
         else{
           console.log(result); 
@@ -192,7 +196,7 @@ app.get("/api/getUserPhotos/:id", (req, res) => {
       (err, result) => {
         if (err) {
           console.log(err);
-          res.send(err.sqlMessage);
+          res.status(400).send(err.sqlMessage);
         }
         else{
           console.log(result); 
@@ -209,7 +213,7 @@ app.get("/api/getScaapes", (req, res) => {
     db.query("select Scaapes.*, UserDetails.* from Scaapes inner join UserDetails on Scaapes.UserId = UserDetails.UserId ;", id, (err, result) => {
       if (err) {
         console.log(err);
-        res.send(err.sqlMessage);  
+        res.status(400).send(err.sqlMessage);  
 
       }
       else{
@@ -224,7 +228,7 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
     db.query(`SELECT ScaapeParticipant.*, UserDetails.* FROM scaape.ScaapeParticipant inner join UserDetails on UserDetails.UserId = ScaapeParticipant.UserId where ScaapeParticipant.ScaapeId = '${ScaapeId}' ;`, (err, result) => {
       if (err) {
         console.log(err);
-        res.send(err.sqlMessage);  
+        res.status(400).send(err.sqlMessage);  
       }
       else{
           console.log(result);
@@ -240,7 +244,7 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
     db.query(`SELECT *, (select count(*) from ScaapeParticipant where ScaapeParticipant.ScaapeId = Scaapes.ScaapeId ) as count FROM scaape.Scaapes where UserId = "${UserId}" and Status = "${Status}";`, (err, result) => {
       if (err) {
         console.log(err);
-        res.send(err.sqlMessage);  
+        res.status(400).send(err.sqlMessage);  
       }
       else{
           console.log(result);
@@ -252,19 +256,26 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
   app.post("/api/UpdateParticipant", (req, res) => {
     const Accepted = req.body.Accepted;
     const UserId = req.body.UserId;
+    const ScaapeId = req.body.ScaapeId;
     console.log(UserId, Accepted);
   
   
     db.query(
-      `update ScaapeParticipant set Accepted = ${Accepted} where UserId = ${UserId};`,
+      `update ScaapeParticipant set Accepted = ${Accepted} where UserId = ${UserId} and ScaapeId = '${ScaapeId}';`,
       (err, result) => {
         if (err) {
           console.log(err);
-          res.send(err.sqlMessage);
+          res.status(400).send(err.sqlMessage);
         }
         else{
           console.log(result); 
-           res.send("Succefully added to db");
+          if(result.affectedRows == 0){
+            res.status(400).send(result.message);
+          }
+          else{
+            res.send("Succefully added to db");
+          }
+           
         }
         
       }
@@ -282,12 +293,12 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
       (err, result) => {
         if (err) {
           console.log(err);
-          res.send(err.sqlMessage);
+          res.status(400).send(err.sqlMessage);
         }
         else{
           console.log(result); 
           if(result.affectedRows === 0){
-            res.send("No rows changed")
+            res.status(400).send("No rows changed");
           }
           else{
             res.send("Succefully deleted from db");
@@ -306,7 +317,7 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
     db.query(`SELECT ScaapeParticipant.*, UserDetails.* FROM scaape.ScaapeParticipant inner join UserDetails on UserDetails.UserId = ScaapeParticipant.UserId where ScaapeParticipant.ScaapeId = '${ScaapeId}' and ScaapeParticipant.Accepted = 1  ;`, (err, result) => {
       if (err) {
         console.log(err);
-        res.send(err.sqlMessage);  
+        res.status(400).send(err.sqlMessage);  
       }
       else{
           console.log(result);
@@ -321,7 +332,7 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
     db.query(`SELECT * , case when exists( SELECT * FROM ScaapeParticipant WHERE UserId = ${UserId} and ScaapeId = Scaapes.ScaapeId ) then 'True' else 'False' end as isPresent, case when exists( select UserId from Scaapes where UserId = ${UserId} ) then 'True' else 'False' end as Admin FROM scaape.Scaapes ;`, (err, result) => {
       if (err) {
         console.log(err);
-        res.send(err.sqlMessage);  
+        res.status(400).send(err.sqlMessage);  
       }
       else{
           console.log(result);
@@ -336,7 +347,7 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
     db.query(`SELECT Scaapes.Location, ScaapeParticipant.*, (select UserDetails.Name from UserDetails where UserDetails.UserId = ScaapeParticipant.UserId) as Name, (select UserDetails.EmailId from UserDetails where UserDetails.UserId = ScaapeParticipant.UserId) as Email, (select UserDetails.InstaId from UserDetails where UserDetails.UserId = ScaapeParticipant.UserId) as InstaId, (select UserDetails.ProfileImg from UserDetails where UserDetails.UserId = ScaapeParticipant.UserId) as DP, (select UserDetails.Vaccine from UserDetails where UserDetails.UserId = ScaapeParticipant.UserId) as Vaccine FROM scaape.ScaapeParticipant inner join Scaapes on Scaapes.ScaapeId = ScaapeParticipant.ScaapeId where Scaapes.UserId = '${UserId}';`, (err, result) => {
       if (err) {
         console.log(err);
-        res.send(err.sqlMessage);  
+        res.status(400).send(err.sqlMessage);  
       }
       else{
           console.log(result);
@@ -345,6 +356,7 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
       
     });
   });
+ 
   app.post("/api/UpdateScaapeStatus", (req, res) => {
     const ScaapeId = req.body.ScaapeId;
     const Status = req.body.Status;
@@ -356,12 +368,12 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
       (err, result) => {
         if (err) {
           console.log(err);
-          res.send(err.sqlMessage);
+          res.status(400).send(err.sqlMessage);
         }
         else{
           console.log(result); 
           if(result.affectedRows === 0){
-            res.send("No rows changed")
+            res.status(400).send("No rows changed");
           }
           else{
             res.send("Succefully updated db");
@@ -384,13 +396,14 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
       (err, result) => {
         if (err) {
           console.log(err);
-          res.send(err.sqlMessage);
+          res.status(400).send(err.sqlMessage);
         }
         else{
           console.log(result); 
           if(result.affectedRows === 0){
             
             res.status(400).send("No rows changed");
+            
           }
           else{
             res.send("Succefully deleted from db");
@@ -402,7 +415,21 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
     );
     
   });
-
+ app.get("/api/getUserScaapes/UserId=:UserId", (req, res) => {
+    const UserId = req.params.UserId;
+    console.log(UserId);
+    db.query(`SELECT ScaapeParticipant.*, Scaapes.Description, Scaapes.Location, Scaapes.ScaapeDate, Scaapes.ScaapeId, Scaapes.ScaapeImg, Scaapes.ScaapeName, Scaapes.ScaapePref, Scaapes.Status FROM scaape.ScaapeParticipant inner join Scaapes on Scaapes.ScaapeId = ScaapeParticipant.ScaapeId where ScaapeParticipant.UserId = '${UserId}';`, (err, result) => {
+      if (err) {
+        console.log(err);
+        res.status(400).send(err.sqlMessage);  
+      }
+      else{
+          console.log(result);
+       res.send(result);   
+      }
+      
+    });
+  });
 
 app.listen(process.env.PORT || 4000, () => {
   console.log(`Example app listening at http://localhost: 4000`);
