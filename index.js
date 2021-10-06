@@ -418,7 +418,7 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
  app.get("/api/getUserScaapes/UserId=:UserId", (req, res) => {
     const UserId = req.params.UserId;
     console.log(UserId);
-    db.query(`SELECT ScaapeParticipant.*, Scaapes.Description, Scaapes.Location, Scaapes.ScaapeDate, Scaapes.ScaapeId, Scaapes.ScaapeImg, Scaapes.ScaapeName, Scaapes.ScaapePref, Scaapes.Status FROM scaape.ScaapeParticipant inner join Scaapes on Scaapes.ScaapeId = ScaapeParticipant.ScaapeId where ScaapeParticipant.UserId = '${UserId}';`, (err, result) => {
+    db.query(`SELECT ScaapeParticipant.*, Scaapes.Description, Scaapes.Location, Scaapes.ScaapeDate, Scaapes.ScaapeId, Scaapes.ScaapeImg, Scaapes.ScaapeName, Scaapes.ScaapePref, Scaapes.Status ,Scaapes.UserId as AdminUserId FROM scaape.ScaapeParticipant inner join Scaapes on Scaapes.ScaapeId = ScaapeParticipant.ScaapeId where ScaapeParticipant.UserId = '${UserId}';`, (err, result) => {
       if (err) {
         console.log(err);
         res.status(400).send(err.sqlMessage);  
