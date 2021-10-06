@@ -165,6 +165,8 @@ app.get("/api/getUserPhotos/:id", (req, res) => {
     const ScaapeImg = req.body.ScaapeImg;
     const Status = req.body.Status;
     const ScaapeDate = req.body.ScaapeDate;
+    const TimeStamp = new Date().valueOf();
+    const Accepted = '1';
   
   
     db.query(
@@ -176,7 +178,21 @@ app.get("/api/getUserPhotos/:id", (req, res) => {
         }
         else{
           console.log(result); 
-           res.send("Succefully added to db");
+           
+           db.query(
+            `insert into ScaapeParticipant (ScaapeId, TimeStamp,UserId,Accepted ) values ('${ScaapeId}', '${TimeStamp}', '${UserId}', '${Accepted}');`,
+            (error, resu) => {
+              if (error) {
+                console.log(error);
+                res.status(400).send(error.sqlMessage);
+              }
+              else{
+                console.log(resu); 
+                 res.send("Succefully added to db");
+              }
+              
+            }
+          );
         }
         
       }
