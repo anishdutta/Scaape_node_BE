@@ -122,7 +122,7 @@ app.post("/api/createUserPhotos", (req, res) => {
 
 app.get("/api/getUserPhotos/:id", (req, res) => {
     const id = req.params.id;
-    db.query("SELECT * FROM UserPhotos WHERE UserId = ?", id, (err, result) => {
+    db.query(`SELECT * FROM UserPhotos WHERE UserId = '${id}'`, (err, result) => {
       if (err) {
         console.log(err);
       }
@@ -290,7 +290,7 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
   
   
     db.query(
-      `update ScaapeParticipant set Accepted = ${Accepted} where UserId = ${UserId} and ScaapeId = '${ScaapeId}';`,
+      `update ScaapeParticipant set Accepted = ${Accepted} where UserId = '${UserId}' and ScaapeId = '${ScaapeId}';`,
       (err, result) => {
         if (err) {
           console.log(err);
