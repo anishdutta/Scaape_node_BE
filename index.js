@@ -357,6 +357,21 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
       
     });
   });
+  app.get("/api/getTrendingScaapesWithAuth/UserId=:UserId", (req, res) => {
+    const UserId = req.params.UserId;
+    console.log(UserId);
+    db.query(`SELECT * , case when exists( SELECT * FROM ScaapeParticipant WHERE UserId = '${UserId}' and ScaapeId = Scaapes.ScaapeId ) then 'True' else 'False' end as isPresent, case when UserId = '${UserId}' then 'True' else 'False' end as Admin, (select count(*) from ScaapeParticipant where ScaapeParticipant.ScaapeId = Scaapes.ScaapeId) as count, (select UserDetails.Name from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminName , (select UserDetails.EmailId from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminEmail , (select UserDetails.ProfileImg from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminDP , (select UserDetails.Vaccine from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminVaccine , (select UserDetails.Gender from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminGender, (2*(select count(*) from ScaapeParticipant where ScaapeParticipant.ScaapeId = Scaapes.ScaapeId) + Scaapes.ClickCount) as rankpoints FROM scaape.Scaapes order by rankpoints desc;`, (err, result) => {
+      if (err) {
+        console.log(err);
+        res.status(400).send(err.sqlMessage);  
+      }
+      else{
+          console.log(result);
+       res.send(result);   
+      }
+      
+    });
+  });
   app.get("/api/getRecentRequest/UserId=:UserId", (req, res) => {
     const UserId = req.params.UserId;
     console.log(UserId);
@@ -446,6 +461,51 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
       
     });
   });
+  app.post("/api/OnClick", (req, res) => {
+    const ScaapeId = req.body.ScaapeId;
+  
+  
+    db.query(
+      `update Scaapes set Scaapes.ClickCount = Scaapes.ClickCount + 1 where Scaapes.ScaapeId = '${ScaapeId}';`,
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res.status(400).send(err.sqlMessage);
+        }
+        else{
+          console.log(result); 
+          if(result.affectedRows === 0){
+            
+            res.status(400).send("No rows changed");
+            
+          }
+          else{
+            res.send("Succefully updated db");
+          }
+           
+        }
+        
+      }
+    );
+    
+  });
+  app.get("/api/getPrefScaapesWithAuth/UserId=:UserId/Pref=:Pref", (req, res) => {
+    const UserId = req.params.UserId;
+    const Pref = req.params.Pref
+    console.log(UserId);
+    db.query(`SELECT * , case when exists( SELECT * FROM ScaapeParticipant WHERE UserId = '${UserId}' and ScaapeId = Scaapes.ScaapeId ) then 'True' else 'False' end as isPresent, case when UserId = '${UserId}' then 'True' else 'False' end as Admin, (select count(*) from ScaapeParticipant where ScaapeParticipant.ScaapeId = Scaapes.ScaapeId) as count, (select UserDetails.Name from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminName , (select UserDetails.EmailId from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminEmail , (select UserDetails.ProfileImg from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminDP , (select UserDetails.Vaccine from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminVaccine , (select UserDetails.Gender from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminGender, (2*(select count(*) from ScaapeParticipant where ScaapeParticipant.ScaapeId = Scaapes.ScaapeId) + Scaapes.ClickCount + (case when Activity = '${Pref}' then 100 else 0 end )) as rankpoints FROM scaape.Scaapes order by rankpoints desc;`, (err, result) => {
+      if (err) {
+        console.log(err);
+        res.status(400).send(err.sqlMessage);  
+      }
+      else{
+          console.log(result);
+       res.send(result);   
+      }
+      
+    });
+  });
+
 
 app.listen(process.env.PORT || 4000, () => {
   console.log(`Example app listening at http://localhost: 4000`);
