@@ -188,7 +188,20 @@ app.get("/api/getUserPhotos/:id", (req, res) => {
               }
               else{
                 console.log(resu); 
-                 res.send("Succefully added to db");
+                db.query(
+                  `insert into UserPhotos (Id,UserId,PhotoUrl  ) values ('${ScaapeId}', '${UserId}', '${ScaapeImg}');`,
+                  (err, result) => {
+                    if (err) {
+                      console.log(err);
+                      res.status(400).send(err.sqlMessage);
+                    }
+                    else{
+                        console.log(result);
+                        res.send("Succefully added to db");
+                    }
+                    
+                  }
+                );
               }
               
             }
