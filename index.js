@@ -48,13 +48,17 @@ app.post('/testUpload', upload.single('file'), function(req,res) {
 
 
 app.get("/api/getUserDetails/:id", (req, res) => {
-  const id = req.params.id;
-  db.query("SELECT * FROM UserDetails WHERE UserId = ?", id, (err, result) => {
+  const UserId = req.params.id;
+  db.query(`SELECT UserDetails.*, (select count(*) from Scaapes where UserId = "${UserId}") as ScaapesCreated, ((select count(*) from ScaapeParticipant where UserId = "${UserId}") - (select count(*) from Scaapes where UserId = "${UserId}")) as ScaapesJoined FROM scaape.UserDetails where UserId="${UserId}";`, (err, result) => {
     if (err) {
       console.log(err);
     }
+    else{
+      console.log(result);
+      res.send(result);
+    }
 
-    res.send(result);
+    
   });
 });
 
@@ -507,6 +511,21 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
     const Pref = req.params.Pref
     console.log(UserId);
     db.query(`SELECT * , case when exists( SELECT * FROM ScaapeParticipant WHERE UserId = '${UserId}' and ScaapeId = Scaapes.ScaapeId ) then 'True' else 'False' end as isPresent, case when UserId = '${UserId}' then 'True' else 'False' end as Admin, (select count(*) from ScaapeParticipant where ScaapeParticipant.ScaapeId = Scaapes.ScaapeId) as count, (select UserDetails.Name from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminName , (select UserDetails.EmailId from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminEmail , (select UserDetails.ProfileImg from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminDP , (select UserDetails.Vaccine from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminVaccine , (select UserDetails.Gender from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminGender, (2*(select count(*) from ScaapeParticipant where ScaapeParticipant.ScaapeId = Scaapes.ScaapeId) + Scaapes.ClickCount + (case when Activity = '${Pref}' then 100 else 0 end )) as rankpoints FROM scaape.Scaapes order by rankpoints desc;`, (err, result) => {
+      if (err) {
+        console.log(err);
+        res.status(400).send(err.sqlMessage);  
+      }
+      else{
+          console.log(result);
+       res.send(result);   
+      }
+      
+    });
+  });
+  app.get("/api/getLatestScaapesWithAuth/UserId=:UserId", (req, res) => {
+    const UserId = req.params.UserId;
+    console.log(UserId);
+    db.query(`SELECT * , case when exists( SELECT * FROM ScaapeParticipant WHERE UserId = '${UserId}' and ScaapeId = Scaapes.ScaapeId ) then 'True' else 'False' end as isPresent, case when UserId = '${UserId}' then 'True' else 'False' end as Admin, (select count(*) from ScaapeParticipant where ScaapeParticipant.ScaapeId = Scaapes.ScaapeId) as count, (select UserDetails.Name from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminName , (select UserDetails.EmailId from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminEmail , (select UserDetails.ProfileImg from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminDP , (select UserDetails.Vaccine from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminVaccine , (select UserDetails.Gender from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminGender, (2*(select count(*) from ScaapeParticipant where ScaapeParticipant.ScaapeId = Scaapes.ScaapeId) + Scaapes.ClickCount) as rankpoints FROM scaape.Scaapes order by ScaapeDate desc;`, (err, result) => {
       if (err) {
         console.log(err);
         res.status(400).send(err.sqlMessage);  
