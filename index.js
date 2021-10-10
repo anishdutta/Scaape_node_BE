@@ -71,10 +71,11 @@ app.post("/api/createUser", (req, res) => {
   const ProfileImg = req.body.ProfileImg;
   const InstaId = req.body.InstaId;
   const Vaccine = req.body.Vaccine;
+  const Bio = req.body.Bio;
 
 
   db.query(
-    `insert into UserDetails (UserId,EmailId,BirthDate,Gender,Name,ProfileImg,InstaId,Vaccine ) values ('${UserId}', '${EmailId}', '${BirthDate}', '${Gender}', '${Name}',  '${ProfileImg}', '${InstaId}', '${Vaccine}');`,
+    `insert into UserDetails (UserId,EmailId,BirthDate,Gender,Name,ProfileImg,InstaId,Vaccine,Bio ) values ('${UserId}', '${EmailId}', '${BirthDate}', '${Gender}', '${Name}',  '${ProfileImg}', '${InstaId}', '${Vaccine}','${Bio}');`,
     (err, result) => {
       if (err) {
         console.log(err);
