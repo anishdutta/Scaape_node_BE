@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "prod": "nodemon ./index.js 65.0.121.93 4000",
-    "dev": "nodemon ./server.js localhost 4000",
+    "prod": "nodemon ./index.js",
+    "dev": "nodemon ./server.js",
     "start": "node index.js"
   },
   "repository": {
