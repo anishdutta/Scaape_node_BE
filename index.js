@@ -171,12 +171,14 @@ app.get("/api/getUserPhotos/:id", (req, res) => {
     const Status = req.body.Status;
     const ScaapeDate = req.body.ScaapeDate;
     const Activity = req.body.Activity;
+    const City = req.body.City;
     const TimeStamp = new Date().valueOf();
     const Accepted = '1';
+     
   
   
     db.query(
-      `insert into Scaapes (ScaapeId, UserId,ScaapeName,Description,ScaapePref,Location,ScaapeImg,Status, ScaapeDate, Activity ) values ('${ScaapeId}', '${UserId}', '${ScaapeName}', '${Description}', '${ScaapePref}', '${Location}',  '${ScaapeImg}', '${Status}', '${ScaapeDate}', '${Activity}');`,
+      `insert into Scaapes (ScaapeId, UserId,ScaapeName,Description,ScaapePref,Location,ScaapeImg,Status, ScaapeDate, Activity, City ) values ('${ScaapeId}', '${UserId}', '${ScaapeName}', '${Description}', '${ScaapePref}', '${Location}',  '${ScaapeImg}', '${Status}', '${ScaapeDate}', '${Activity}', '${City}');`,
       (err, result) => {
         if (err) {
           console.log(err);
