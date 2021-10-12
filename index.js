@@ -541,6 +541,33 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
       
     });
   });
+  app.post("/api/UpdateVaccineCert", (req, res) => {
+    const VaccineCert = req.body.VaccineCert;
+    const UserId = req.body.UserId;
+  
+  
+    db.query(
+      `update UserDetails set VaccineCert = '${VaccineCert}' where UserId = '${UserId}';`,
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res.status(400).send(err.sqlMessage);
+        }
+        else{
+          console.log(result); 
+          if(result.affectedRows == 0){
+            res.status(400).send(result.message);
+          }
+          else{
+            res.send("Succefully added to db");
+          }
+           
+        }
+        
+      }
+    );
+    
+  });
 
 
 app.listen(process.env.PORT || 4000, () => {
