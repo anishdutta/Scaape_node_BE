@@ -596,6 +596,21 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
     );
     
   });
+  app.get("/api/getNewsletter", (req, res) => {
+    const UserId = req.params.UserId;
+    console.log(UserId);
+    db.query(`SELECT * FROM scaape.Newsletter;`, (err, result) => {
+      if (err) {
+        console.log(err);
+        res.status(400).send(err.sqlMessage);  
+      }
+      else{
+          console.log(result);
+       res.send(result);   
+      }
+      
+    });
+  });
 
 
 app.listen(process.env.PORT || 4000, () => {
