@@ -72,10 +72,19 @@ app.post("/api/createUser", (req, res) => {
   const InstaId = req.body.InstaId;
   const Vaccine = req.body.Vaccine;
   const Bio = req.body.Bio;
-
+  const TimeStamp = new Date().valueOf();
 
   db.query(
     `insert into UserDetails (UserId,EmailId,BirthDate,Gender,Name,ProfileImg,InstaId,Vaccine,Bio ) values ('${UserId}', '${EmailId}', '${BirthDate}', '${Gender}', '${Name}',  '${ProfileImg}', '${InstaId}', '${Vaccine}','${Bio}');`,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      }
+      console.log(result);
+    }
+  );
+  db.query(
+    `insert into Notification (UserId,TimeStamp,MsgCode ) values ('${UserId}', '${TimeStamp}', 'UserWlcm');`,
     (err, result) => {
       if (err) {
         console.log(err);
@@ -214,6 +223,15 @@ app.get("/api/getUserPhotos/:id", (req, res) => {
               
             }
           );
+          db.query(
+            `insert into Notification (UserId,ScaapeId,TimeStamp,MsgCode ) values ('${UserId}','${ScaapeId}', '${TimeStamp}', 'OnScaape');`,
+            (err, result) => {
+              if (err) {
+                console.log(err);
+              }
+              console.log(result);
+            }
+          );
         }
         
       }
@@ -226,7 +244,7 @@ app.get("/api/getUserPhotos/:id", (req, res) => {
     const UserId = req.body.UserId;
     const Accepted = req.body.Accepted;
  
-  
+    
   
     db.query(
       `insert into ScaapeParticipant (ScaapeId, TimeStamp,UserId,Accepted ) values ('${ScaapeId}', '${TimeStamp}', '${UserId}', '${Accepted}');`,
@@ -295,8 +313,18 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
     const UserId = req.body.UserId;
     const ScaapeId = req.body.ScaapeId;
     console.log(UserId, Accepted);
+    const TimeStamp = new Date().valueOf();
+
   
-  
+    db.query(
+      `insert into Notification (UserId,ScaapeId,TimeStamp,MsgCode ) values ('${UserId}','${ScaapeId}', '${TimeStamp}', 'OnAccept');`,
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        }
+        console.log(result);
+      }
+    );
     db.query(
       `update ScaapeParticipant set Accepted = ${Accepted} where UserId = '${UserId}' and ScaapeId = '${ScaapeId}';`,
       (err, result) => {
@@ -600,6 +628,21 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
     const UserId = req.params.UserId;
     console.log(UserId);
     db.query(`SELECT * FROM scaape.Newsletter;`, (err, result) => {
+      if (err) {
+        console.log(err);
+        res.status(400).send(err.sqlMessage);  
+      }
+      else{
+          console.log(result);
+       res.send(result);   
+      }
+      
+    });
+  });
+  app.get("/api/getNotifications/UserId=:UserId", (req, res) => {
+    const UserId = req.params.UserId;
+    console.log(UserId);
+    db.query(`SELECT Notification.*, UserDetails.*, Scaapes.*, MessageCode.Message FROM scaape.Notification inner join UserDetails on UserDetails.UserId = Notification.UserId inner join Scaapes on Scaapes.ScaapeId = Notification.ScaapeId inner join MessageCode on MessageCode.MsgCode = Notification.MsgCode where Notification.UserId = "${UserId}";`, (err, result) => {
       if (err) {
         console.log(err);
         res.status(400).send(err.sqlMessage);  
