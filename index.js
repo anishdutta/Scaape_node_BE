@@ -655,6 +655,47 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
     });
   });
 
+  // app.get("/api/getPlacesNearby", (req, res) => {
+
+  //   const sdk = require('api')('@fsq-docs/v1.0#1xlrgkw44nr4y');
+
+  //   sdk['place-search']({
+  //     ll: '23.5046%2C87.4977',
+  //     categories: '18021',
+  //     sort: 'POPULARITY',
+  //     limit: '10',
+  //     Authorization: 'fsq3MVOGtijr4At219b3/T5QyxSX5ZYGeikpq92vn1icWIM='
+  //   })
+  //     .then(res => console.log(res))
+  //     .catch(err => console.error(err));
+  // });
+  app.post("/api/UpdateTutorial", (req, res) => {
+    const showTutorial = req.body.showTutorial;
+    const UserId = req.body.UserId;
+  
+  
+    db.query(
+      `update UserDetails set showTutorial = ${showTutorial} where UserId = '${UserId}';`,
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res.status(400).send(err.sqlMessage);
+        }
+        else{
+          console.log(result); 
+          if(result.affectedRows == 0){
+            res.status(400).send(result.message);
+          }
+          else{
+            res.send("Succefully added to db");
+          }
+           
+        }
+        
+      }
+    );
+    
+  });
 
 app.listen(process.env.PORT || 4000, () => {
   console.log(`Example app listening at http://localhost: 4000`);
