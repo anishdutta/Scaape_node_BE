@@ -20,7 +20,6 @@
   },
   "homepage": "https://github.com/Scaape/Scaape_node_BE#readme",
   "dependencies": {
-    "api": "^4.1.0",
     "body-parser": "^1.19.0",
     "chai": "^4.3.4",
     "cors": "^2.8.5",
