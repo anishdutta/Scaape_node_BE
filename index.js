@@ -14,7 +14,8 @@ app.use(cors());
 const path = require('path');
 const multer = require('multer');
 const logger = require('morgan');
-const serveIndex = require('serve-index')
+const serveIndex = require('serve-index');
+const { wrap } = require("module");
 
 var storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -694,6 +695,71 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
         
       }
     );
+    
+  });
+  function isBoundingBox(minLat, minLong, maxLat, maxLong, Long, Lat){
+    let isLonginRange;
+    let isLatinRange;
+
+    wrapMaxLon = (minLong>maxLong)? maxLong + 360 : maxLong;
+    wrapMinLon = (minLong>maxLong)?minLong - 360 : minLong;
+
+
+    isLonginRange = Long >= minLong && Long <= maxLong;
+    console.log(Long,minLong,maxLong);
+    isLatinRange = Lat >= minLat && Lat <= maxLat;
+    console.log(isLonginRange);
+    return (isLonginRange && isLatinRange);
+
+     }
+
+  app.get("/api/getGeoScaapes", (req, res) => {
+    const minLat = req.body.minLat;
+    const minLong = req.body.minLong;
+    const maxLat = req.body.maxLat;
+    const maxLong = req.body.maxLong;
+    const UserId = req.body.UserId;
+    // const Long = req.body.Long;
+    // const Lat = req.body.Lat;
+
+
+    var allScaapes = {};
+    var geoscaape = {};
+    var lng = 0;
+  console.log(maxLong);
+    db.query(
+      `SELECT * , case when exists( SELECT * FROM ScaapeParticipant WHERE UserId = '${UserId}' and ScaapeId = Scaapes.ScaapeId ) then 'True' else 'False' end as isPresent, case when UserId = '${UserId}' then 'True' else 'False' end as Admin, (select count(*) from ScaapeParticipant where ScaapeParticipant.ScaapeId = Scaapes.ScaapeId) as count, (select UserDetails.Name from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminName , (select UserDetails.EmailId from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminEmail , (select UserDetails.ProfileImg from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminDP , (select UserDetails.Vaccine from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminVaccine ,(select UserDetails.InstaId from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminInsta, (select UserDetails.Gender from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminGender, (2*(select count(*) from ScaapeParticipant where ScaapeParticipant.ScaapeId = Scaapes.ScaapeId) + Scaapes.ClickCount) as rankpoints FROM scaape.Scaapes order by rankpoints desc;`,
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res.status(400).send(err.sqlMessage);
+        }
+        else{
+          // console.log(result); 
+          if(result.affectedRows == 0){
+            res.status(400).send(result.message);
+          }
+          else{
+            allScaapes["All"] = result;
+            var j=0;
+            for(var i=0;  i<allScaapes['All'].length; i++){
+              // console.log(allScaapes["All"][i]['Lng']);
+              console.log(isBoundingBox(minLat, minLong, maxLat,  maxLong, 85.090210, 23.717049))
+              if(isBoundingBox(minLat, minLong, maxLat,  maxLong, allScaapes["All"][i]['Lng'], allScaapes["All"][i]['Lat'])){
+                console.log(allScaapes["All"][i]);
+                
+                geoscaape[j] = allScaapes["All"][i];
+                j=j+1;
+              }
+            }
+            res.send(geoscaape);
+          }
+           
+        }
+        
+      }
+    );
+
     
   });
 
