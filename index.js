@@ -16,6 +16,7 @@ const multer = require('multer');
 const logger = require('morgan');
 const serveIndex = require('serve-index');
 const { wrap } = require("module");
+const { match } = require("assert/strict");
 
 var storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -716,17 +717,25 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
   app.get("/api/getGeoScaapes", (req, res) => {
     const minLat = req.body.minLat;
     const minLong = req.body.minLong;
-    const maxLat = req.body.maxLat;
-    const maxLong = req.body.maxLong;
+    // const maxLat = req.body.maxLat;
+    // const maxLong = req.body.maxLong;
     const UserId = req.body.UserId;
     // const Long = req.body.Long;
     // const Lat = req.body.Lat;
+    const radMinLat = minLat*(Math.PI/180);
+    const radMinLong = minLong*(Math.PI/180);
+    maxLat = Math.asin(Math.sin(radMinLat)*Math.cos(50/6400) + Math.cos(radMinLat)*Math.sin(50/6400)*Math.cos(1.57));
+    maxLong = radMinLong + Math.atan2(Math.sin(1.57)*Math.sin(50/6400)*Math.cos(radMinLat), Math.cos(50/6400) - Math.sin(radMinLat)*Math.sin(maxLat)); 
+    maxLat = maxLat*(180/Math.PI);
+    maxLong = maxLong*(180/Math.PI);
+    console.log("ye h ",maxLat, maxLong);
+
 
 
     var allScaapes = {};
     var geoscaape = {};
     var lng = 0;
-  console.log(maxLong);
+  // console.log(maxLong);
     db.query(
       `SELECT * , case when exists( SELECT * FROM ScaapeParticipant WHERE UserId = '${UserId}' and ScaapeId = Scaapes.ScaapeId ) then 'True' else 'False' end as isPresent, case when UserId = '${UserId}' then 'True' else 'False' end as Admin, (select count(*) from ScaapeParticipant where ScaapeParticipant.ScaapeId = Scaapes.ScaapeId) as count, (select UserDetails.Name from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminName , (select UserDetails.EmailId from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminEmail , (select UserDetails.ProfileImg from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminDP , (select UserDetails.Vaccine from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminVaccine ,(select UserDetails.InstaId from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminInsta, (select UserDetails.Gender from UserDetails where UserDetails.UserId = Scaapes.UserId) as AdminGender, (2*(select count(*) from ScaapeParticipant where ScaapeParticipant.ScaapeId = Scaapes.ScaapeId) + Scaapes.ClickCount) as rankpoints FROM scaape.Scaapes order by rankpoints desc;`,
       (err, result) => {
@@ -744,7 +753,7 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
             var j=0;
             for(var i=0;  i<allScaapes['All'].length; i++){
               // console.log(allScaapes["All"][i]['Lng']);
-              console.log(isBoundingBox(minLat, minLong, maxLat,  maxLong, 85.090210, 23.717049))
+              // console.log(isBoundingBox(minLat, minLong, maxLat,  maxLong, 85.090210, 23.717049))
               if(isBoundingBox(minLat, minLong, maxLat,  maxLong, allScaapes["All"][i]['Lng'], allScaapes["All"][i]['Lat'])){
                 console.log(allScaapes["All"][i]);
                 
