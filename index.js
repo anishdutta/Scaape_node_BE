@@ -15,6 +15,8 @@ const path = require('path');
 const multer = require('multer');
 const logger = require('morgan');
 const serveIndex = require('serve-index');
+const { wrap } = require("module");
+const { match } = require("assert/strict");
 
 var storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -705,28 +707,48 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
 
 
     isLonginRange = Long >= minLong && Long <= maxLong;
-    console.log(Long,minLong,maxLong);
+    // console.log(Long,minLong,maxLong);
     isLatinRange = Lat >= minLat && Lat <= maxLat;
-    console.log(isLonginRange);
+    // console.log(isLonginRange);
     return (isLonginRange && isLatinRange);
 
      }
 
+     function getBoundsFromLatLng(lat, lng, radiusInKm){
+      var lat_change = radiusInKm/111.2;
+      var lon_change = Math.abs(Math.cos(lat*(Math.PI/180)));
+      var bounds = { 
+          lat_min : lat - lat_change,
+          lon_min : lng - lon_change,
+          lat_max : lat + lat_change,
+          lon_max : lng + lon_change
+      };
+      console.log(bounds);
+      return bounds;
+ }
+
   app.get("/api/getGeoScaapes", (req, res) => {
     const minLat = req.body.minLat;
     const minLong = req.body.minLong;
+    var bounds = {};
+    bounds =  getBoundsFromLatLng(minLat, minLong, 50);
+    console.log(bounds.lat_min);
     // const maxLat = req.body.maxLat;
     // const maxLong = req.body.maxLong;
     const UserId = req.body.UserId;
+    // const R = 6378.1 
+    // const brng = 1.57 
+    // const d = 50 
     // const Long = req.body.Long;
     // const Lat = req.body.Lat;
-    const radMinLat = minLat*(Math.PI/180);
-    const radMinLong = minLong*(Math.PI/180);
-    maxLat = Math.asin(Math.sin(radMinLat)*Math.cos(50/6400) + Math.cos(radMinLat)*Math.sin(50/6400)*Math.cos(1.57));
-    maxLong = radMinLong + Math.atan2(Math.sin(1.57)*Math.sin(50/6400)*Math.cos(radMinLat), Math.cos(50/6400) - Math.sin(radMinLat)*Math.sin(maxLat)); 
-    maxLat = maxLat*(180/Math.PI);
-    maxLong = maxLong*(180/Math.PI);
-    console.log("ye h ",maxLat, maxLong);
+    // const radMinLat = minLat*(Math.PI/180);
+    // const radMinLong = minLong*(Math.PI/180);
+    // maxLat = Math.asin(Math.sin(radMinLat)*Math.cos(d/R) + Math.cos(radMinLat)*Math.sin(d/R)*Math.cos(brng));
+    // maxLong = radMinLong + Math.atan2(Math.sin(brng)*Math.sin(d/R)*Math.cos(radMinLat), Math.cos(d/R) - Math.sin(radMinLat)*Math.sin(maxLat)); 
+    // maxLat = maxLat*(180/Math.PI);
+    // maxLong = maxLong*(180/Math.PI);
+    // console.log("ye h ",maxLat, maxLong);
+    // console.log("ye h 2",minLat, minLong);
 
 
 
@@ -752,7 +774,7 @@ app.get("/api/getParticipants/ScaapeId=:ScaapeId", (req, res) => {
             for(var i=0;  i<allScaapes['All'].length; i++){
               // console.log(allScaapes["All"][i]['Lng']);
               // console.log(isBoundingBox(minLat, minLong, maxLat,  maxLong, 85.090210, 23.717049))
-              if(isBoundingBox(minLat, minLong, maxLat,  maxLong, allScaapes["All"][i]['Lng'], allScaapes["All"][i]['Lat'])){
+              if(isBoundingBox(bounds.lat_min, bounds.lon_min, bounds.lat_max,  bounds.lon_max, allScaapes["All"][i]['Lng'], allScaapes["All"][i]['Lat'])){
                 console.log(allScaapes["All"][i]);
                 
                 geoscaape[j] = allScaapes["All"][i];
